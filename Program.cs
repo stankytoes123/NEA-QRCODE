@@ -1,4 +1,5 @@
 using Microsoft.VisualBasic;
+using System.Runtime.Intrinsics.X86;
 using System.Security.Policy;
 using System.Text;
 using System.Windows.Forms;
@@ -36,7 +37,7 @@ namespace NEA_QRCODE
             }
 
            
-            
+            Inputs(form, GridQR);
             GridQR[9, 22] = 3; // Black module
             PlaceFinderPattern(GridQR, 1, 1);
             PlaceFinderPattern(GridQR, 1, size - 8);
@@ -44,22 +45,22 @@ namespace NEA_QRCODE
             PlaceAlignmentPattern(GridQR, 21, 21);
             PlaceTimingStrips(GridQR);
             CreateGrid(size, form, GridQR);
-
+            
             Application.Run(form);
-            String URL = Inputs(form);
-            StringToCodeBinary(URL);
+            
+            
            
         }
-        static String Inputs(Form form)
+        static void Inputs(Form form, int[,] GridQR)
         {
-            String URL = "";
-
             TextBox inputBox = new TextBox()
             {
                 Location = new Point(100, 700),
                 Width = 530,
                 Height = 30
             };
+
+        form.Controls.Add(inputBox);
 
             Button GenerateQR = new Button()
             {
@@ -70,20 +71,32 @@ namespace NEA_QRCODE
                 Text = "Generate"
             };
 
-            GenerateQR.Click += (sender, e) =>
-            {
-                URL = inputBox.Text;
-            };
+        form.Controls.Add(GenerateQR);
 
-            form.Controls.Add(inputBox);
-            form.Controls.Add(GenerateQR);
-
-            return URL;
+        GenerateQR.Click += (sender, e) => GenerateQRCode(inputBox);
         }
 
-        
+        public static void GenerateQRCode(TextBox inputBox)
+        {
+            string inputCode = inputBox.Text;
 
-        static void PlaceFinderPattern(int[,] GridQR, int StartX, int StartY)
+            if (string.IsNullOrEmpty(inputCode))
+            {
+                MessageBox.Show("Please enter URL before generating");
+            }
+            else
+            {
+                string binaryCode = StringToCodeBinary(inputCode);
+
+                inputBox.Clear();
+            }       
+            
+
+
+        }
+
+
+            static void PlaceFinderPattern(int[,] GridQR, int StartX, int StartY)
         {
             for (int i = 0; i < 7; i++)
             {
@@ -146,11 +159,11 @@ namespace NEA_QRCODE
 
 
         // Converts a character to it's corresponding ASCII 8-bit binary number
-        static String StringToCodeBinary(String URL) 
+        static String StringToCodeBinary(String inputCode) 
         {
             Encoding iso88591 = Encoding.GetEncoding("ISO-8859-1");
 
-            byte[] isoBytes = iso88591.GetBytes(URL);
+            byte[] isoBytes = iso88591.GetBytes(inputCode);
 
             StringBuilder binaryBuilder = new StringBuilder();
             
