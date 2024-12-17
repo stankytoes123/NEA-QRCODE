@@ -11,8 +11,9 @@ namespace NEA_QRCODE
     class GenerateMatrixGUI : GenerateMatrixArray
     {
         private TableLayoutPanel tableLayoutPanel;
-        public GenerateMatrixGUI(int size, int[,] GridQR, Form form)
+        public GenerateMatrixGUI(int size, int[,] GridQR)
         {
+            Form form = CreateForm();
             TextBox inputBox = CreateInputBox();
             Button generateQRButton = CreateGenerateQRButton();
             AddToForm(form, inputBox, generateQRButton);
@@ -25,6 +26,7 @@ namespace NEA_QRCODE
 
                 CreateGrid(size, form, GridQR);
             };
+            Application.Run(form);
         }
 
         public void ClearTableLayout(Form form)
@@ -60,7 +62,14 @@ namespace NEA_QRCODE
                 Text = "Generate"
             };
         }
-
+        private Form CreateForm()
+        {
+            return new Form1
+            {
+                Size = new Size(1000, 800),
+                BackColor = Color.Gray,
+            };
+        }
         public TableLayoutPanel CreateGrid(int size, Form form, int[,] GridQR)
         {
 
