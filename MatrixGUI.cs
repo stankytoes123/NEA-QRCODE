@@ -8,10 +8,10 @@ using System.Windows.Forms;
 
 namespace NEA_QRCODE
 {
-    class GenerateMatrixGUI : GenerateMatrixArray
+    class MatrixGUI : MatrixArray
     {
         private TableLayoutPanel tableLayoutPanel;
-        public GenerateMatrixGUI(int size, int[,] GridQR)
+        public MatrixGUI(int size, int[,] GridQR)
         {
             Form form = CreateForm();
             TextBox inputBox = CreateInputBox();

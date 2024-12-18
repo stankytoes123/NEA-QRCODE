@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NEA_QRCODE
 {
-    class GenerateMatrixArray
+    class MatrixArray
     {
         
         void PlaceConstPatterns(int[,] GridQR, int size)

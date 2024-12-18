@@ -18,10 +18,11 @@ namespace NEA_QRCODE
             // 0 = White, 1 = Black, 2 = Reserved White, 3 = Reserved Black
             int[,] GridQR = new int[size, size];
 
-            GenerateMatrixArray generateMatrixArray = new GenerateMatrixArray();
+            MatrixArray generateMatrixArray = new MatrixArray();
 
-            GenerateMatrixGUI generateMatrixGUI = new GenerateMatrixGUI(size, GridQR);
+            MatrixGUI generateMatrixGUI = new MatrixGUI(size, GridQR);
 
+            GF GF = new GF(20);
         }
     }
 }
