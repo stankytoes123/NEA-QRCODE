@@ -9,7 +9,6 @@ namespace NEA_QRCODE
 
         static void Main()
         {
-
             ApplicationConfiguration.Initialize();
 
             int size = 31;
@@ -20,9 +19,10 @@ namespace NEA_QRCODE
 
             MatrixArray generateMatrixArray = new MatrixArray();
 
-            MatrixGUI generateMatrixGUI = new MatrixGUI(size, GridQR);
+            ErrorCorrection errorCorrection = new ErrorCorrection();
 
-            GF GF = new GF(20);
+            MatrixGUI generateMatrixGUI = new MatrixGUI(size, GridQR);
+           
         }
     }
 }
