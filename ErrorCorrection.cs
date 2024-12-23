@@ -11,6 +11,7 @@ namespace NEA_QRCODE
     {
         private const int GFSize = 256;
         public List<int> GeneratorPolynomial;
+        public List<int> MessagePolynomial;
         public int[] exAlphaToInt = new int[GFSize];
         public int[] intToExAlpha = new int[GFSize];
 
@@ -18,13 +19,40 @@ namespace NEA_QRCODE
         {
             InitializeTable();
             GeneratorPolynomial = new List<int> {0, 87, 229, 146, 149, 238, 102, 21};
-            CreateGeneratorPolynomial(43);
+            MessagePolynomial = new List<int>();
+            CreateGeneratorPolynomial(15);
         }
 
-        void CreateGeneratorPolynomial(int degree)
+        void CalcCodewordsEC()
         {
-            
-                // How many times to iterate to create polynomial
+            // Prepare for division
+            for (int i = 0; i < 15; i++)
+            {
+                MessagePolynomial.Add(0);
+            }
+            int m = MessagePolynomial.Count - GeneratorPolynomial.Count;
+            for (int i = 0; i < m; i++)
+            {
+                GeneratorPolynomial.Add(0);
+            }
+
+
+        }
+
+        public void CreateMessagePolynomial(string encodedData)
+        {  
+            for (int i = 0; i < (encodedData.Length / 8); i++)
+            {
+                int dataByte = Convert.ToInt32(encodedData.Substring(i * 8, 8), 2);
+                MessagePolynomial.Add(dataByte);
+            }
+            CalcCodewordsEC();
+        }
+
+        private void CreateGeneratorPolynomial(int degree)
+        {
+
+            // How many times to iterate to create polynomial
             for (int i = 0; i < degree - 7; i++)
             {
 
@@ -67,7 +95,7 @@ namespace NEA_QRCODE
 
             }
             
-       }
+        }
 
         public void InitializeTable()
         {

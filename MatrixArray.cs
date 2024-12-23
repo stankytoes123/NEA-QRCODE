@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NEA_QRCODE
 {
-    class MatrixArray
+    class MatrixArray : ErrorCorrection
     {
         
         void PlaceConstPatterns(int[,] GridQR, int size)
@@ -22,27 +22,20 @@ namespace NEA_QRCODE
 
         public void GenerateQRCode(TextBox inputBox, int[,] GridQR, int size, Form form)
         {
-            string inputCode = inputBox.Text;
-            if (string.IsNullOrEmpty(inputCode))
-            {
-                MessageBox.Show("Please enter URL before generating");
-            }
-            else
-            {
-                string binaryCode = StringToCodeBinary(inputCode);
+           
+            string binaryCode = StringToCodeBinary(inputBox.Text);
 
-                inputBox.Clear();
+            CreateMessagePolynomial(binaryCode);
 
-                PlaceConstPatterns(GridQR, size);
+            inputBox.Clear();
 
-                
-            }
+            PlaceConstPatterns(GridQR, size);
 
         }
-
-        void PlaceStringPattern(int size, int[,] GridQR, string binaryCode)
+        string StringToCodeBinary(string input)
         {
-
+            return  "0100" + CharCountIndicator(input) + StringToISO88591(input) + 
+                     TerminatorStringCalc(input) + MOf8(input) + PadBytes(input);
         }
 
         string StringToISO88591(string input)
@@ -106,13 +99,6 @@ namespace NEA_QRCODE
         string CharCountIndicator(string input)
         {
             return Convert.ToString(input.Length, 2).PadLeft(8, '0');
-        }
-
-
-        string StringToCodeBinary(string input)
-        {
-            return  "0100" + CharCountIndicator(input) + StringToISO88591(input) + 
-                     TerminatorStringCalc(input) + MOf8(input) + PadBytes(input);
         }
 
         void PlaceFinderPattern(int[,] GridQR, int StartX, int StartY)

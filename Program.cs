@@ -6,7 +6,7 @@ namespace NEA_QRCODE
     internal static class Program
     {
         [STAThread]
-
+        // https://www.youtube.com/watch?v=7yrCWV4Cfko
         static void Main()
         {
             ApplicationConfiguration.Initialize();

@@ -20,11 +20,20 @@ namespace NEA_QRCODE
             tableLayoutPanel = CreateGrid(size, form, GridQR);
             generateQRButton.Click += (sender, e) =>
             {
-                ClearTableLayout(form);
+                if (string.IsNullOrEmpty(inputBox.Text))
+                {
+                    MessageBox.Show("Please enter URL before generating");
+                }
+                else
+                {
 
-                GenerateQRCode(inputBox, GridQR, size, form);
+                    ClearTableLayout(form);
 
-                CreateGrid(size, form, GridQR);
+                    GenerateQRCode(inputBox, GridQR, size, form);
+
+                    CreateGrid(size, form, GridQR);
+
+                }
             };
             Application.Run(form);
         }
