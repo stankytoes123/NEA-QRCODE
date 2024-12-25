@@ -31,9 +31,9 @@ namespace NEA_QRCODE
 
                     ClearTextBox(inputBox);
 
-                    ClearTableLayout(form);
-
                     GenerateQRCode(input, GridQR, size, whiteSpace, form);
+
+                    ClearTableLayout(form);
 
                     CreateGrid(size + whiteSpace, form, GridQR);
 
@@ -45,6 +45,7 @@ namespace NEA_QRCODE
         private void ClearTextBox(TextBox inputBox)
         {
             inputBox.Clear();
+            inputBox.Text = string.Empty;
         }
 
         private void ClearTableLayout(Form form)
@@ -112,7 +113,7 @@ namespace NEA_QRCODE
                     Panel colourPanel = new Panel()
                     {
                         Size = new Size(18, 18),               // Set panel size
-                        BorderStyle = BorderStyle.FixedSingle, // Temporary border for debugging
+                        //BorderStyle = BorderStyle.FixedSingle, // Temporary border for debugging
                         Margin = new Padding(0),               // Remove margins
                         Padding = new Padding(0)               // Remove padding
                     };

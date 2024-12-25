@@ -6,7 +6,7 @@ namespace NEA_QRCODE
     internal static class Program
     {
         [STAThread]
-        // https://www.youtube.com/watch?v=7yrCWV4Cfko
+        // https://www.youtube.com/watch?v=w5ebcowAJD8&t=0s
         static void Main()
         {
             ApplicationConfiguration.Initialize();
@@ -23,9 +23,9 @@ namespace NEA_QRCODE
 
 
 
-            MatrixArray generateMatrixArray = new MatrixArray();
-
             ErrorCorrection errorCorrection = new ErrorCorrection();
+
+            MatrixArray generateMatrixArray = new MatrixArray();
 
             MatrixGUI generateMatrixGUI = new MatrixGUI(size, whiteSpace, GridQR);
            

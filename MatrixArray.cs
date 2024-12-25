@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace NEA_QRCODE
 {
     class MatrixArray : ErrorCorrection
     {
-        
+
         // Place the reserved QR Code Patterns
         void PlaceReservedPatterns(int[,] GridQR, int size, int whiteSpace)
         {
@@ -19,7 +20,7 @@ namespace NEA_QRCODE
             PlaceFinderPattern(GridQR, size - 8 + whiteSpace, 0 + whiteSpace / 2);
             PlaceSeperators(GridQR, 0 + whiteSpace / 2, size - whiteSpace / 2);
             PlaceAlignmentPattern(GridQR, 19 + whiteSpace, 19 + whiteSpace);
-            PlaceTimingStrips(GridQR, 8 + whiteSpace / 2, size - 6 - whiteSpace / 2);
+            PlaceTimingStrips(GridQR, 7 + whiteSpace / 2, size - 6 - whiteSpace / 2);
             PlaceBlackModule(GridQR, 8 + whiteSpace / 2, size - 6 - whiteSpace / 2);
             PlaceFormatStrips(GridQR, 0 + whiteSpace / 2, size + whiteSpace / 2);
         }
@@ -29,46 +30,112 @@ namespace NEA_QRCODE
 
             string binaryCodeWords = FinalString(input);
 
+            int a = binaryCodeWords.Length;
+
             PlaceReservedPatterns(GridQR, size, whiteSpace);
-            
+
             PlaceDataAndECCodewords(binaryCodeWords, GridQR, size, size, size + whiteSpace / 2);
 
+            Mask0(size + whiteSpace / 2, GridQR);
+
         }
+
+        void Mask0(int size, int[,] GridQR)
+        {
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    if ((i + j) % 2 == 0 && GridQR[i, j] != 2 && GridQR[i, j] != 3)
+                    {
+                        GridQR[i, j] = (GridQR[i, j] == 0) ? 1 : 0;
+                    }
+                }
+            }
+        }
+
+        void Mask1(int size, int[,] GridQR)
+        {
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    if ((i % 2 == 0) && GridQR[i, j] != 2 && GridQR[i, j] != 3 )                  
+                    {
+                        GridQR[i, j] = (GridQR[i, j] == 0) ? 1 : 0;
+                    }
+                }
+            }
+        }
+
+
+        
 
         void PlaceDataAndECCodewords(string input, int[,] GridQR, int currentX, int currentY, int border)
         {
             int c = 0;
             bool upOrDown = true;
-            
+
             while (c < input.Length)
             {
                 if (upOrDown == true & currentY > 0)
                 {
-                    MatrixPattern(input.Substring(c, 1), GridQR, currentX, currentY, c);
+                    if (GridQR[currentX, currentY] == 0 || GridQR[currentX, currentY] == 1)
+                    {
+                        GridQR[currentX, currentY] = Convert.ToInt32(input.Substring(c, 1));
+                        c++;
+                    }
+
+                    if (GridQR[currentX - 1, currentY] == 0 || GridQR[currentX - 1, currentY] == 1)
+                    {
+                        GridQR[currentX - 1, currentY] = Convert.ToInt32(input.Substring(c, 1));
+                        c++;
+                    }
                     currentY--;
                 }
                 else if (upOrDown == false & currentY < border)
                 {
-                    MatrixPattern(input.Substring(c, 1), GridQR, currentX, currentY, c);
+                    if (GridQR[currentX, currentY] == 0 || GridQR[currentX, currentY] == 1)
+                    {
+                        GridQR[currentX, currentY] = Convert.ToInt32(input.Substring(c, 1));
+                        c++;
+                    }
+
+                    if (GridQR[currentX - 1, currentY] == 0 || GridQR[currentX - 1, currentY] == 1)
+                    {
+                        GridQR[currentX - 1, currentY] = Convert.ToInt32(input.Substring(c, 1));
+                        c++;
+                    }
                     currentY++;
                 }
+                else
+                {
+                    if (upOrDown == true && currentX == 9)
+                    {
+                        upOrDown = false;
+                        currentX -= 3;
+                        currentY++;
+                    }
+                    else if (upOrDown)
+                    {
+                        upOrDown = false;
+                        currentX -= 2;
+                        currentY++;
+                    }
+                    else
+                    {
+                        upOrDown = true;
+                        currentX -= 2;
+                        currentY--;
+                    }
+                }
             }
-        }
 
-        void MatrixPattern(string input, int[,] GridQR, int currentX, int currentY, int c)
-        {
-            if (GridQR[currentX, currentY] != 2 || GridQR[currentX, currentY] != 3)
-            {
-                GridQR[currentX, currentY] = Convert.ToInt32(input);
-                c++;
-            }
 
-            if (GridQR[currentX - 1, currentY] != 2 || GridQR[currentX - 1, currentY] != 3)
-            {
-                GridQR[currentX - 1, currentY] = Convert.ToInt32(input);
-                c++;
-            }
         }
+        
+    
+
 
         string FinalString(string input)
         {
@@ -77,6 +144,7 @@ namespace NEA_QRCODE
 
         string StringToCodeBinary(string input)
         {
+
             return  "0100" + CharCountIndicator(input) + StringToISO88591(input) + 
                      TerminatorStringCalc(input) + MOf8(input) + PadBytes(input);
         }
@@ -255,7 +323,7 @@ namespace NEA_QRCODE
 
                 if (validX)
                 {
-                    GridQR[i, 9] = (fString.Substring(xCounter, 1) == "1") ? 3 : 2;
+                    GridQR[i, 9] = (fString.Substring(xCounter, 1) == "1") ? 3 : 2; 
                     xCounter++;
                 }
 

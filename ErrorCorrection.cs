@@ -12,9 +12,11 @@ namespace NEA_QRCODE
     {
         private const int GFSize = 256;
         private const int GPSize = 15;
+        private const int maskNumber = 0;
         public string ECBin = "";
-        public string fString = "01000";
+        public string fString;
         public string fGeneratorPolynomial = "10100110111";
+        public string fMaskString = "101010000010010";
         public List<int> GeneratorPolynomial;
         public List<int> MessagePolynomial;
         public int[] exAlphaToInt = new int[GFSize];
@@ -23,33 +25,42 @@ namespace NEA_QRCODE
         public ErrorCorrection()
         {
             InitializeTable();
+            fString = "01" + Convert.ToString(maskNumber, 2).PadLeft(3, '0');
             GeneratorPolynomial = new List<int> {0, 87, 229, 146, 149, 238, 102, 21};
             MessagePolynomial = new List<int>();
             CreateGeneratorPolynomial(GPSize);
         }
 
+        
+
         public string CreateFormatString()
         {
-            return fString + CreateFormatStringEC(fString);
-        }
+            string tempString = fString;
 
-        public string CreateFormatStringEC(string fString)
-        {
-            fString = fString.PadRight(15, '0');
+            string fGeneratorPolynomialPadded = fGeneratorPolynomial;
 
-            do
+            tempString = tempString.PadRight(15, '0');
+
+            while (tempString.Substring(0, 1) == "0")
             {
-                fString = fString.Substring(1);
-            } while (fString.Substring(0) == "0");
-
-            while (fString.Length > 10)
-            {
-                fGeneratorPolynomial = fGeneratorPolynomial.PadRight(fString.Length, '0');
-                fString = XORBinaryStrings(fString, fGeneratorPolynomial);
-                fString = fString.Substring(1);
+                tempString = tempString.Substring(1);
             }
 
-            return fString;
+            while (tempString.Length > 10)
+            {
+                
+                fGeneratorPolynomialPadded = fGeneratorPolynomial.PadRight(tempString.Length, '0');
+                tempString = XORBinaryStrings(tempString, fGeneratorPolynomialPadded);
+                while (tempString.Substring(0, 1) == "0")
+                {
+                    tempString = tempString.Substring(1);
+                } 
+                
+            }
+
+
+
+            return XORBinaryStrings(fString + tempString, fMaskString);
         }
 
         private string XORBinaryStrings(string str1, string str2)
@@ -136,6 +147,10 @@ namespace NEA_QRCODE
             {
                 ECBin += Convert.ToString(MessagePolynomial[i], 2).PadLeft(8, '0');
             }
+
+            MessagePolynomial.Clear();
+            GeneratorPolynomial = new List<int> { 0, 87, 229, 146, 149, 238, 102, 21 };
+
             return ECBin;
         }
 
@@ -192,6 +207,7 @@ namespace NEA_QRCODE
                 //Clear for next use and efficient memory usage
                 tempList1.Clear();
                 tempList2.Clear();
+                
 
             }
             
