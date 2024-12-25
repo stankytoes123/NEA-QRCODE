@@ -10,14 +10,15 @@ namespace NEA_QRCODE
 {
     class MatrixGUI : MatrixArray
     {
+
         private TableLayoutPanel tableLayoutPanel;
-        public MatrixGUI(int size, int[,] GridQR)
+        public MatrixGUI(int size, int whiteSpace, int[,] GridQR)
         {
             Form form = CreateForm();
             TextBox inputBox = CreateInputBox();
             Button generateQRButton = CreateGenerateQRButton();
             AddToForm(form, inputBox, generateQRButton);
-            tableLayoutPanel = CreateGrid(size, form, GridQR);
+            tableLayoutPanel = CreateGrid(size + whiteSpace, form, GridQR);
             generateQRButton.Click += (sender, e) =>
             {
                 if (string.IsNullOrEmpty(inputBox.Text))
@@ -26,19 +27,27 @@ namespace NEA_QRCODE
                 }
                 else
                 {
+                    string input = inputBox.Text;
+
+                    ClearTextBox(inputBox);
 
                     ClearTableLayout(form);
 
-                    GenerateQRCode(inputBox, GridQR, size, form);
+                    GenerateQRCode(input, GridQR, size, whiteSpace, form);
 
-                    CreateGrid(size, form, GridQR);
+                    CreateGrid(size + whiteSpace, form, GridQR);
 
                 }
             };
             Application.Run(form);
         }
 
-        public void ClearTableLayout(Form form)
+        private void ClearTextBox(TextBox inputBox)
+        {
+            inputBox.Clear();
+        }
+
+        private void ClearTableLayout(Form form)
         {
             form.Controls.Remove(tableLayoutPanel);
         }
@@ -79,14 +88,14 @@ namespace NEA_QRCODE
                 BackColor = Color.Gray,
             };
         }
-        public TableLayoutPanel CreateGrid(int size, Form form, int[,] GridQR)
+        public TableLayoutPanel CreateGrid(int whiteSpaceSize, Form form, int[,] GridQR)
         {
 
             // Create a TableLayoutPanel to hold the panels
             TableLayoutPanel tableLayoutPanel = new TableLayoutPanel()
             {
-                RowCount = size,
-                ColumnCount = size,
+                RowCount = whiteSpaceSize,
+                ColumnCount = whiteSpaceSize,
                 AutoSize = true,
                 Location = new Point(
                     form.ClientSize.Width / 2 - 400,
@@ -95,9 +104,9 @@ namespace NEA_QRCODE
             };
 
             // Loop to add panels to the TableLayoutPanel
-            for (int i = 0; i < size; i++)
+            for (int i = 0; i < whiteSpaceSize; i++)
             {
-                for (int j = 0; j < size; j++)
+                for (int j = 0; j < whiteSpaceSize; j++)
                 {
                     // Create a new panel with a black background
                     Panel colourPanel = new Panel()
@@ -112,9 +121,13 @@ namespace NEA_QRCODE
                     {
                         colourPanel.BackColor = Color.White;
                     }
-                    else
+                    else if (GridQR[i, j] == 1 || GridQR[i, j] == 3)
                     {
                         colourPanel.BackColor = Color.Black;
+                    }
+                    else
+                    {
+                        colourPanel.BackColor = Color.Blue;
                     }
 
                     // Add the panel to the table layout at the appropriate row and column

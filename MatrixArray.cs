@@ -10,32 +10,87 @@ namespace NEA_QRCODE
     class MatrixArray : ErrorCorrection
     {
         
-        void PlaceConstPatterns(int[,] GridQR, int size)
+        // Place the reserved QR Code Patterns
+        void PlaceReservedPatterns(int[,] GridQR, int size, int whiteSpace)
         {
-            PlaceFinderPattern(GridQR, 1, 1);
-            PlaceFinderPattern(GridQR, 1, size - 8);
-            PlaceFinderPattern(GridQR, size - 8, 1);
-            PlaceAlignmentPattern(GridQR, 21, 21);
-            PlaceTimingStrips(GridQR);
-            PlaceBlackModule(GridQR);
+            PlaceWhiteSpace(GridQR, size + whiteSpace / 2);
+            PlaceFinderPattern(GridQR, 0 + whiteSpace / 2, 0 + whiteSpace / 2);
+            PlaceFinderPattern(GridQR, 0 + whiteSpace / 2, size - 8 + whiteSpace);
+            PlaceFinderPattern(GridQR, size - 8 + whiteSpace, 0 + whiteSpace / 2);
+            PlaceSeperators(GridQR, 0 + whiteSpace / 2, size - whiteSpace / 2);
+            PlaceAlignmentPattern(GridQR, 19 + whiteSpace, 19 + whiteSpace);
+            PlaceTimingStrips(GridQR, 8 + whiteSpace / 2, size - 6 - whiteSpace / 2);
+            PlaceBlackModule(GridQR, 8 + whiteSpace / 2, size - 6 - whiteSpace / 2);
+            PlaceFormatStrips(GridQR, 0 + whiteSpace / 2, size + whiteSpace / 2);
         }
 
-        public void GenerateQRCode(TextBox inputBox, int[,] GridQR, int size, Form form)
+        public void GenerateQRCode(string input, int[,] GridQR, int size, int whiteSpace, Form form)
         {
-           
-            string binaryCode = StringToCodeBinary(inputBox.Text);
 
-            CreateMessagePolynomial(binaryCode);
+            string binaryCodeWords = FinalString(input);
 
-            inputBox.Clear();
-
-            PlaceConstPatterns(GridQR, size);
+            PlaceReservedPatterns(GridQR, size, whiteSpace);
+            
+            PlaceDataAndECCodewords(binaryCodeWords, GridQR, size, size, size + whiteSpace / 2);
 
         }
+
+        void PlaceDataAndECCodewords(string input, int[,] GridQR, int currentX, int currentY, int border)
+        {
+            int c = 0;
+            bool upOrDown = true;
+            
+            while (c < input.Length)
+            {
+                if (upOrDown == true & currentY > 0)
+                {
+                    MatrixPattern(input.Substring(c, 1), GridQR, currentX, currentY, c);
+                    currentY--;
+                }
+                else if (upOrDown == false & currentY < border)
+                {
+                    MatrixPattern(input.Substring(c, 1), GridQR, currentX, currentY, c);
+                    currentY++;
+                }
+            }
+        }
+
+        void MatrixPattern(string input, int[,] GridQR, int currentX, int currentY, int c)
+        {
+            if (GridQR[currentX, currentY] != 2 || GridQR[currentX, currentY] != 3)
+            {
+                GridQR[currentX, currentY] = Convert.ToInt32(input);
+                c++;
+            }
+
+            if (GridQR[currentX - 1, currentY] != 2 || GridQR[currentX - 1, currentY] != 3)
+            {
+                GridQR[currentX - 1, currentY] = Convert.ToInt32(input);
+                c++;
+            }
+        }
+
+        string FinalString(string input)
+        {
+            return StringToCodeBinary(input) + CreateECCodewords(StringToCodeBinary(input)) + RemainderBits(3);
+        }
+
         string StringToCodeBinary(string input)
         {
             return  "0100" + CharCountIndicator(input) + StringToISO88591(input) + 
                      TerminatorStringCalc(input) + MOf8(input) + PadBytes(input);
+        }
+
+        string RemainderBits(int version)
+        {
+            if (version > 1)
+            {
+                return new string('0', 7);
+            }
+            else
+            {
+                return "";
+            }
         }
 
         string StringToISO88591(string input)
@@ -123,6 +178,30 @@ namespace NEA_QRCODE
             }
         }
 
+        void PlaceWhiteSpace(int[,] GridQR, int border)
+        {
+            for (int i = 0; i <= border; i++)
+            {
+                GridQR[0, border - i] = 2;
+                GridQR[border - i, 0] = 2;
+                GridQR[0 + i, border] = 2;
+                GridQR[border, 0 + i] = 2;
+            }
+        }
+
+        void PlaceSeperators(int[,] GridQR, int startLoc, int endLoc)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                GridQR[startLoc + i, startLoc + 7] = 2;
+                GridQR[startLoc + i, endLoc - 6] = 2;
+                GridQR[endLoc - 6 + i, startLoc + 7] = 2;
+                GridQR[startLoc + 7, startLoc + i] = 2;
+                GridQR[endLoc - 6, startLoc + i] = 2;
+                GridQR[startLoc + 7 , endLoc - 6 + i] = 2;
+            }
+        }
+
         void PlaceAlignmentPattern(int[,] GridQR, int StartX, int StartY)
         {
             for (int i = 0; i < 5; i++)
@@ -144,9 +223,9 @@ namespace NEA_QRCODE
             }
         }
 
-        void PlaceTimingStrips(int[,] GridQR)
+        void PlaceTimingStrips(int[,] GridQR, int startLoc, int endLoc)
         {
-            for (int i = 8; i <= 22; i++)
+            for (int i = startLoc; i < endLoc; i++)
             {
                 if (i % 2 == 1)
                 {
@@ -161,9 +240,37 @@ namespace NEA_QRCODE
             }
         }
 
-        void PlaceBlackModule(int[,] GridQR)
+        void PlaceFormatStrips(int[,] GridQR, int startLoc, int endLoc)
         {
-            GridQR[9, 22] = 3;
+
+            string fString = CreateFormatString();
+            int xCounter = 0;
+            int yCounter = 0;
+
+            for (int i = startLoc; i < endLoc; i++)
+            {
+
+                bool validX = ((i >= startLoc && i <= startLoc + 7) || i >= endLoc - 8) && i != 7;
+                bool validY = ((i >= startLoc && i <= startLoc + 6) || i >= endLoc - 9) && i != endLoc - 7;
+
+                if (validX)
+                {
+                    GridQR[i, 9] = (fString.Substring(xCounter, 1) == "1") ? 3 : 2;
+                    xCounter++;
+                }
+
+                if (validY)
+                {
+                    GridQR[9, endLoc - i] = (fString.Substring(yCounter, 1) == "1") ? 3 : 2;
+                    yCounter++;
+                }
+
+            }
+        }
+
+        void PlaceBlackModule(int[,] GridQR, int x, int y)
+        {
+            GridQR[x, y] = 3;
         }
     }
 }

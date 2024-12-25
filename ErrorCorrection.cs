@@ -4,12 +4,17 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace NEA_QRCODE
 {
     public class ErrorCorrection
     {
         private const int GFSize = 256;
+        private const int GPSize = 15;
+        public string ECBin = "";
+        public string fString = "01000";
+        public string fGeneratorPolynomial = "10100110111";
         public List<int> GeneratorPolynomial;
         public List<int> MessagePolynomial;
         public int[] exAlphaToInt = new int[GFSize];
@@ -20,33 +25,128 @@ namespace NEA_QRCODE
             InitializeTable();
             GeneratorPolynomial = new List<int> {0, 87, 229, 146, 149, 238, 102, 21};
             MessagePolynomial = new List<int>();
-            CreateGeneratorPolynomial(15);
+            CreateGeneratorPolynomial(GPSize);
         }
 
-        void CalcCodewordsEC()
+        public string CreateFormatString()
         {
+            return fString + CreateFormatStringEC(fString);
+        }
+
+        public string CreateFormatStringEC(string fString)
+        {
+            fString = fString.PadRight(15, '0');
+
+            do
+            {
+                fString = fString.Substring(1);
+            } while (fString.Substring(0) == "0");
+
+            while (fString.Length > 10)
+            {
+                fGeneratorPolynomial = fGeneratorPolynomial.PadRight(fString.Length, '0');
+                fString = XORBinaryStrings(fString, fGeneratorPolynomial);
+                fString = fString.Substring(1);
+            }
+
+            return fString;
+        }
+
+        private string XORBinaryStrings(string str1, string str2)
+        {
+            char[] result = new char[str1.Length];
+            for (int i = 0; i < str1.Length; i++)
+            {
+                // XOR operation for each character
+                result[i] = str1[i] == str2[i] ? '0' : '1';
+            }
+            return new string(result);
+        }
+
+
+        public string CreateECCodewords(string encodedData)
+        {
+            CreateMessagePolynomial(encodedData);
+            CalcDivisionEC();
+            return ECBinConversion();
+        }
+
+        void CalcDivisionEC()
+        {
+            List<int> tempList = new List<int>();
+
+            int divisionCount = MessagePolynomial.Count;
+
             // Prepare for division
-            for (int i = 0; i < 15; i++)
+            for (int j = 0; j < GPSize; j++)
             {
-                MessagePolynomial.Add(0);
-            }
-            int m = MessagePolynomial.Count - GeneratorPolynomial.Count;
-            for (int i = 0; i < m; i++)
-            {
-                GeneratorPolynomial.Add(0);
+                    MessagePolynomial.Add(0);
             }
 
+            // Coeff of x generator polynomial needs to be multiplied by
+            int coeff = MessagePolynomial.Count - GeneratorPolynomial.Count;
 
+            // Prepare for division
+            for (int j = 0; j < coeff; j++)
+            {
+                    GeneratorPolynomial.Add(0);
+            }
+
+            for (int i = 0; i < divisionCount; i++)
+            {
+                
+                // Multipler in alpha notation for generator polynomial
+                int m = intToExAlpha[MessagePolynomial[0]];
+
+                // Multiply generator polynomial
+                for (int j = 0; j < GeneratorPolynomial.Count - coeff; j++)
+                {
+
+                    tempList.Add(GeneratorPolynomial[j] + m);
+
+                    if (tempList[j] > 255)
+                    {
+                        tempList[j] %= 255;
+                    }
+
+                    tempList[j] = exAlphaToInt[tempList[j]];
+
+                }
+
+                // Add ending 0s
+                for (int j = 0; j < coeff; j++)
+                {
+                    tempList.Add(0);
+                }
+
+                for (int j = 0; j < MessagePolynomial.Count; j++)
+                {
+                    MessagePolynomial[j] ^= tempList[j];
+                }
+
+                MessagePolynomial.RemoveAt(0);
+
+                tempList.Clear();
+            }
+        }
+
+        public string ECBinConversion()
+        {
+            for (int i = 0; i < MessagePolynomial.Count; i++)
+            {
+                ECBin += Convert.ToString(MessagePolynomial[i], 2).PadLeft(8, '0');
+            }
+            return ECBin;
         }
 
         public void CreateMessagePolynomial(string encodedData)
-        {  
+        {
+            
             for (int i = 0; i < (encodedData.Length / 8); i++)
             {
                 int dataByte = Convert.ToInt32(encodedData.Substring(i * 8, 8), 2);
                 MessagePolynomial.Add(dataByte);
             }
-            CalcCodewordsEC();
         }
 
         private void CreateGeneratorPolynomial(int degree)
