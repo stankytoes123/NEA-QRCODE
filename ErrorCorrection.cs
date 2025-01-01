@@ -13,11 +13,10 @@ namespace NEA_QRCODE
         private const int GFSize = 256;
         private const int GPSize = 15;
         private const int maskNumber = 0;
-        public string ECBin = "";
         public string fString;
         public string fGeneratorPolynomial = "10100110111";
         public string fMaskString = "101010000010010";
-        public List<int> GeneratorPolynomial;
+        public List<int> GeneratorPolynomial = new List<int> {0, 87, 229, 146, 149, 238, 102, 21};
         public List<int> MessagePolynomial;
         public int[] exAlphaToInt = new int[GFSize];
         public int[] intToExAlpha = new int[GFSize];
@@ -25,10 +24,9 @@ namespace NEA_QRCODE
         public ErrorCorrection()
         {
             InitializeTable();
-            fString = "01" + Convert.ToString(maskNumber, 2).PadLeft(3, '0');
-            GeneratorPolynomial = new List<int> {0, 87, 229, 146, 149, 238, 102, 21};
+            fString = "01" + Convert.ToString(maskNumber, 2).PadLeft(3, '0'); 
             MessagePolynomial = new List<int>();
-            CreateGeneratorPolynomial(GPSize);
+            
         }
 
         
@@ -77,6 +75,7 @@ namespace NEA_QRCODE
 
         public string CreateECCodewords(string encodedData)
         {
+            CreateGeneratorPolynomial(GPSize);
             CreateMessagePolynomial(encodedData);
             CalcDivisionEC();
             return ECBinConversion();
@@ -143,14 +142,15 @@ namespace NEA_QRCODE
 
         public string ECBinConversion()
         {
+            string ECBin = "";
+
             for (int i = 0; i < MessagePolynomial.Count; i++)
             {
                 ECBin += Convert.ToString(MessagePolynomial[i], 2).PadLeft(8, '0');
             }
 
             MessagePolynomial.Clear();
-            GeneratorPolynomial = new List<int> { 0, 87, 229, 146, 149, 238, 102, 21 };
-
+            int a = ECBin.Length;   
             return ECBin;
         }
 
@@ -166,7 +166,7 @@ namespace NEA_QRCODE
 
         private void CreateGeneratorPolynomial(int degree)
         {
-
+            GeneratorPolynomial = new List<int> { 0, 87, 229, 146, 149, 238, 102, 21 };
             // How many times to iterate to create polynomial
             for (int i = 0; i < degree - 7; i++)
             {

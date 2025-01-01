@@ -33,24 +33,23 @@ namespace NEA_QRCODE
 
                     GenerateQRCode(input, GridQR, size, whiteSpace, form);
 
-                    ClearTableLayout(form);
+                    ClearTableLayout();
 
                     CreateGrid(size + whiteSpace, form, GridQR);
-
                 }
             };
             Application.Run(form);
         }
 
+
         private void ClearTextBox(TextBox inputBox)
         {
             inputBox.Clear();
-            inputBox.Text = string.Empty;
         }
 
-        private void ClearTableLayout(Form form)
+        private void ClearTableLayout()
         {
-            form.Controls.Remove(tableLayoutPanel);
+            tableLayoutPanel.Dispose();            
         }
 
 
@@ -91,9 +90,10 @@ namespace NEA_QRCODE
         }
         public TableLayoutPanel CreateGrid(int whiteSpaceSize, Form form, int[,] GridQR)
         {
-
+            
+            
             // Create a TableLayoutPanel to hold the panels
-            TableLayoutPanel tableLayoutPanel = new TableLayoutPanel()
+            tableLayoutPanel = new TableLayoutPanel()
             {
                 RowCount = whiteSpaceSize,
                 ColumnCount = whiteSpaceSize,
@@ -103,6 +103,8 @@ namespace NEA_QRCODE
                     form.ClientSize.Height / 2 - 279 // Vertically center the TableLayoutPanel
                 ),
             };
+
+            
 
             // Loop to add panels to the TableLayoutPanel
             for (int i = 0; i < whiteSpaceSize; i++)
@@ -136,8 +138,12 @@ namespace NEA_QRCODE
                 }
             }
 
+
+
             form.Controls.Add(tableLayoutPanel);
 
+            
+            
             return tableLayoutPanel;
             
         }
