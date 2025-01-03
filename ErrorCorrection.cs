@@ -24,8 +24,8 @@ namespace NEA_QRCODE
         public ErrorCorrection()
         {
             InitializeTable();
-            fString = "01" + Convert.ToString(maskNumber, 2).PadLeft(3, '0'); 
-            MessagePolynomial = new List<int>();
+            fString = "01" + Convert.ToString(maskNumber, 2).PadLeft(3, '0');
+            MessagePolynomial = new List<int> ();
             
         }
 
@@ -85,6 +85,8 @@ namespace NEA_QRCODE
         {
             List<int> tempList = new List<int>();
 
+            int c = 0;
+
             int divisionCount = MessagePolynomial.Count;
 
             // Prepare for division
@@ -102,9 +104,14 @@ namespace NEA_QRCODE
                     GeneratorPolynomial.Add(0);
             }
 
-            for (int i = 0; i < divisionCount; i++)
+            while (c < divisionCount) 
             {
-                
+                while (MessagePolynomial[0] == 0)
+                {
+                    MessagePolynomial.RemoveAt(0);
+                    c++;
+                }
+
                 // Multipler in alpha notation for generator polynomial
                 int m = intToExAlpha[MessagePolynomial[0]];
                 
@@ -125,7 +132,7 @@ namespace NEA_QRCODE
                 }
 
                 // Add ending 0s
-                for (int j = 0; j < coeff; j++)
+                for (int j = 0; j < MessagePolynomial.Count; j++)
                 {
                     tempList.Add(0);
                 }
@@ -136,6 +143,8 @@ namespace NEA_QRCODE
                 }
 
                 MessagePolynomial.RemoveAt(0);
+
+                c++;
 
                 tempList.Clear();
             }
@@ -226,7 +235,7 @@ namespace NEA_QRCODE
                 }
                 intToExAlpha[exAlphaToInt[i]] = i;
             }
-            //intToExAlpha[0] = -1;
+            intToExAlpha[0] = -1;
             intToExAlpha[1] = 0;
         }
 
