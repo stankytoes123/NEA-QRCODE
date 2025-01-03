@@ -10,15 +10,17 @@ namespace NEA_QRCODE
 {
     class MatrixGUI : MatrixArray
     {
-
+        private Form QRForm;
+        private TextBox inputBox;
+        private Button generateQRButton;
         private TableLayoutPanel tableLayoutPanel;
         public MatrixGUI(int size, int whiteSpace, int[,] GridQR)
         {
-            Form form = CreateForm();
-            TextBox inputBox = CreateInputBox();
-            Button generateQRButton = CreateGenerateQRButton();
-            AddToForm(form, inputBox, generateQRButton);
-            tableLayoutPanel = CreateGrid(size + whiteSpace, form, GridQR);
+            QRForm = CreateForm();
+            inputBox = CreateInputBox();
+            generateQRButton = CreateGenerateQRButton();
+            AddToForm(QRForm, inputBox, generateQRButton);
+            tableLayoutPanel = CreateGrid(size + whiteSpace, QRForm, GridQR);
             generateQRButton.Click += (sender, e) =>
             {
                 if (string.IsNullOrEmpty(inputBox.Text))
@@ -31,14 +33,14 @@ namespace NEA_QRCODE
 
                     ClearTextBox(inputBox);
 
-                    GenerateQRCode(input, GridQR, size, whiteSpace, form);
+                    GenerateQRCode(input, GridQR, size, whiteSpace, QRForm);
 
                     ClearTableLayout();
 
-                    CreateGrid(size + whiteSpace, form, GridQR);
+                    CreateGrid(size + whiteSpace, QRForm, GridQR);
                 }
             };
-            Application.Run(form);
+            Application.Run(QRForm);
         }
 
 
@@ -53,7 +55,7 @@ namespace NEA_QRCODE
         }
 
 
-        void AddToForm(Form form, TextBox inputBox, Button generateQRButton)
+        private void AddToForm(Form form, TextBox inputBox, Button generateQRButton)
         {
             form.Controls.Add(inputBox);
             form.Controls.Add(generateQRButton);
@@ -82,13 +84,15 @@ namespace NEA_QRCODE
         }
         private Form CreateForm()
         {
-            return new Form1
+            return new Form
             {
+                Text = "QR Code Generator",
                 Size = new Size(1000, 800),
                 BackColor = Color.Gray,
             };
+            
         }
-        public TableLayoutPanel CreateGrid(int whiteSpaceSize, Form form, int[,] GridQR)
+        private TableLayoutPanel CreateGrid(int whiteSpaceSize, Form form, int[,] GridQR)
         {
             
             
@@ -142,8 +146,6 @@ namespace NEA_QRCODE
 
             form.Controls.Add(tableLayoutPanel);
 
-            
-            
             return tableLayoutPanel;
             
         }

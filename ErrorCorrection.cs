@@ -12,7 +12,7 @@ namespace NEA_QRCODE
     {
         private const int GFSize = 256;
         private const int GPSize = 15;
-        private const int maskNumber = 0;
+        private const int maskNumber = 7;
         public string fString;
         public string fGeneratorPolynomial = "10100110111";
         public string fMaskString = "101010000010010";
@@ -56,7 +56,7 @@ namespace NEA_QRCODE
                 
             }
 
-
+            tempString = tempString.PadLeft(10, '0');
 
             return XORBinaryStrings(fString + tempString, fMaskString);
         }
@@ -107,8 +107,9 @@ namespace NEA_QRCODE
                 
                 // Multipler in alpha notation for generator polynomial
                 int m = intToExAlpha[MessagePolynomial[0]];
-
+                
                 // Multiply generator polynomial
+                
                 for (int j = 0; j < GeneratorPolynomial.Count - coeff; j++)
                 {
 
@@ -225,6 +226,7 @@ namespace NEA_QRCODE
                 }
                 intToExAlpha[exAlphaToInt[i]] = i;
             }
+            //intToExAlpha[0] = -1;
             intToExAlpha[1] = 0;
         }
 

@@ -21,8 +21,6 @@ namespace NEA_QRCODE
             // 0 = White, 1 = Black, 2 = Reserved White, 3 = Reserved Black
             int[,] GridQR = new int[size + whiteSpace, size + whiteSpace];
 
-
-
             ErrorCorrection errorCorrection = new ErrorCorrection();
 
             MatrixArray generateMatrixArray = new MatrixArray();

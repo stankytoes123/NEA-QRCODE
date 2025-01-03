@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Drawing;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace NEA_QRCODE
             PlaceFinderPattern(GridQR, size - 8 + whiteSpace, 0 + whiteSpace / 2);
             PlaceSeperators(GridQR, 0 + whiteSpace / 2, size - whiteSpace / 2);
             PlaceAlignmentPattern(GridQR, 19 + whiteSpace, 19 + whiteSpace);
-            PlaceTimingStrips(GridQR, 7 + whiteSpace / 2, size - 6 - whiteSpace / 2);
+            PlaceTimingStrips(GridQR, 7 + whiteSpace, size - 5 - whiteSpace);
             PlaceBlackModule(GridQR, 8 + whiteSpace / 2, size - 6 - whiteSpace / 2);
             PlaceFormatStrips(GridQR, 0 + whiteSpace / 2, size + whiteSpace / 2);
         }
@@ -36,7 +37,7 @@ namespace NEA_QRCODE
 
             PlaceDataAndECCodewords(binaryCodeWords, GridQR, size, size, size + whiteSpace / 2);
 
-            Mask0(size + whiteSpace / 2, GridQR);
+            Mask7(size + whiteSpace, GridQR);
 
         }
 
@@ -68,15 +69,33 @@ namespace NEA_QRCODE
             }
         }
 
+        void Mask7(int size, int[,] GridQR)
+        {
+            for (int i = 1; i < size - 1; i++)
+            {
+                for (int j = 1; j < size - 1; j++)
+                {
+                    int col = i - 1;
+                    int row = j - 1;
 
-        
+                    
+                    if (((((col + row) % 2) +((col * row) % 3)) % 2) == 0 && GridQR[i, j] != 2 && GridQR[i, j] != 3)
+                    {
+                        GridQR[i, j] = (GridQR[i, j] == 0) ? 1 : 0;
+                    }
+                }
+            }
+        }
+
+
+
 
         void PlaceDataAndECCodewords(string input, int[,] GridQR, int currentX, int currentY, int border)
         {
             int c = 0;
             bool upOrDown = true;
 
-            while (c < input.Length)
+            while (c < input.Length)     
             {
                 if (upOrDown == true & currentY > 0)
                 {
@@ -205,9 +224,9 @@ namespace NEA_QRCODE
             StringBuilder binaryBuilder = new StringBuilder();
 
             string temp = "0100" + CharCountIndicator(input) + StringToISO88591(input) + TerminatorStringCalc(input) + MOf8(input);
-            for (int i = 1; i <= (440 - temp.Length) / 8; i++)
+            for (int i = 0; i < (440 - temp.Length) / 8; i++)
             {
-                if (i % 2 == 1)
+                if (i % 2 == 0)
                 {
                     binaryBuilder.Append("11101100");
                 }
@@ -295,16 +314,16 @@ namespace NEA_QRCODE
         {
             for (int i = startLoc; i < endLoc; i++)
             {
-                if (i % 2 == 1)
-                {
-                    GridQR[7, i] = 3;
+               if (i % 2 == 1)
+               {
+                    GridQR[7, i] = 3; // 3
                     GridQR[i, 7] = 3;
-                }
-                else
-                {
+               }
+               else 
+               {
                     GridQR[7, i] = 2;
                     GridQR[i, 7] = 2;
-                }
+               }
             }
         }
 
