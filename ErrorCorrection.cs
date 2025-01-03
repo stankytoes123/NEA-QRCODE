@@ -110,12 +110,7 @@ namespace NEA_QRCODE
             // division process
             while (c < divisionCount) 
             {
-                // removing extra 0s at beginning of polynomial
-                while (MessagePolynomial[0] == 0)
-                {
-                    MessagePolynomial.RemoveAt(0);
-                    c++;
-                }
+                
 
                 // Multipler in alpha notation for generator polynomial
                 int m = intToExAlpha[MessagePolynomial[0]];
@@ -147,12 +142,15 @@ namespace NEA_QRCODE
                     MessagePolynomial[j] ^= tempList[j];
                 }
 
-                // Remove resultant 0
-                MessagePolynomial.RemoveAt(0);
-
-                // Increment division counter
-                c++;
-
+                
+                // removing 0s at beginning of polynomial
+                while (MessagePolynomial[0] == 0)
+                {
+                    MessagePolynomial.RemoveAt(0);
+                    c++;
+                }
+      
+                
                 // Clear for next use
                 tempList.Clear();
             }
