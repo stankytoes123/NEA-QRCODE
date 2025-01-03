@@ -37,7 +37,7 @@ namespace NEA_QRCODE
 
             PlaceDataAndECCodewords(binaryCodeWords, GridQR, size, size, size + whiteSpace / 2);
 
-            Mask7(size + whiteSpace, GridQR);
+            Mask0(size + whiteSpace, GridQR);
 
         }
 

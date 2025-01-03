@@ -12,7 +12,7 @@ namespace NEA_QRCODE
     {
         private const int GFSize = 256;
         private const int GPSize = 15;
-        private const int maskNumber = 7;
+        private const int maskNumber = 0;
         public string fString;
         public string fGeneratorPolynomial = "10100110111";
         public string fMaskString = "101010000010010";
@@ -83,10 +83,13 @@ namespace NEA_QRCODE
 
         void CalcDivisionEC()
         {
+            // tempList to hold multiplied generator polynomial
             List<int> tempList = new List<int>();
 
+            // counter for how many times to divide 
             int c = 0;
 
+            // times to divide
             int divisionCount = MessagePolynomial.Count;
 
             // Prepare for division
@@ -104,8 +107,10 @@ namespace NEA_QRCODE
                     GeneratorPolynomial.Add(0);
             }
 
+            // division process
             while (c < divisionCount) 
             {
+                // removing extra 0s at beginning of polynomial
                 while (MessagePolynomial[0] == 0)
                 {
                     MessagePolynomial.RemoveAt(0);
@@ -116,7 +121,6 @@ namespace NEA_QRCODE
                 int m = intToExAlpha[MessagePolynomial[0]];
                 
                 // Multiply generator polynomial
-                
                 for (int j = 0; j < GeneratorPolynomial.Count - coeff; j++)
                 {
 
@@ -137,36 +141,43 @@ namespace NEA_QRCODE
                     tempList.Add(0);
                 }
 
+                // XOR polynomials together
                 for (int j = 0; j < MessagePolynomial.Count; j++)
                 {
                     MessagePolynomial[j] ^= tempList[j];
                 }
 
+                // Remove resultant 0
                 MessagePolynomial.RemoveAt(0);
 
+                // Increment division counter
                 c++;
 
+                // Clear for next use
                 tempList.Clear();
             }
         }
 
         public string ECBinConversion()
         {
+            // Holds value of EC Codewords in binary
             string ECBin = "";
 
+            // Convert divided message polynomial to binary 
             for (int i = 0; i < MessagePolynomial.Count; i++)
             {
                 ECBin += Convert.ToString(MessagePolynomial[i], 2).PadLeft(8, '0');
             }
 
+            // Clear for next use
             MessagePolynomial.Clear();
-            int a = ECBin.Length;   
+            
             return ECBin;
         }
 
         public void CreateMessagePolynomial(string encodedData)
         {
-            
+            // Each byte of data string is converted to decimal and added to message polynomial
             for (int i = 0; i < (encodedData.Length / 8); i++)
             {
                 int dataByte = Convert.ToInt32(encodedData.Substring(i * 8, 8), 2);
@@ -205,10 +216,10 @@ namespace NEA_QRCODE
                 tempList2.Insert(0, 0);
 
                 // Converting to ints and collecting like terms
-                for (int k = 0; k < tempList1.Count - 1; k++)
+                for (int j = 0; j < tempList1.Count - 1; j++)
                 {
-                    tempList1[k] = exAlphaToInt[tempList1[k]];
-                    GeneratorPolynomial.Add(intToExAlpha[tempList1[k] ^ tempList2[k]]);
+                    tempList1[j] = exAlphaToInt[tempList1[j]];
+                    GeneratorPolynomial.Add(intToExAlpha[tempList1[j] ^ tempList2[j]]);
                 }
 
                 //Final polynomial requires this code
